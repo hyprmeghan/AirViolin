@@ -24,6 +24,38 @@
 
 #include <Wire.h> // Used for I2C
 
+// GYRO
+
+//This is a list of registers in the ITG-3200. Registers are parameters that determine how the sensor will behave, or they can hold data that represent the
+//sensors current status.
+//To learn more about the registers on the ITG-3200, download and read the datasheet.
+char WHO_AM_I = 0x00;
+char SMPLRT_DIV= 0x15;
+char DLPF_FS = 0x16;
+char GYRO_XOUT_H = 0x1D;
+char GYRO_XOUT_L = 0x1E;
+char GYRO_YOUT_H = 0x1F;
+char GYRO_YOUT_L = 0x20;
+char GYRO_ZOUT_H = 0x21;
+char GYRO_ZOUT_L = 0x22;
+
+//This is a list of settings that can be loaded into the registers.
+//DLPF, Full Scale Register Bits
+//FS_SEL must be set to 3 for proper operation
+//Set DLPF_CFG to 3 for 1kHz Fint and 42 Hz Low Pass Filter
+char DLPF_CFG_0 = (1<<0);
+char DLPF_CFG_1 = (1<<1);
+char DLPF_CFG_2 = (1<<2);
+char DLPF_FS_SEL_0 = (1<<3);
+char DLPF_FS_SEL_1 = (1<<4);
+
+//I2C devices each have an address. The address is defined in the datasheet for the device. The ITG-3200 breakout board can have different address depending on how
+//the jumper on top of the board is configured. By default, the jumper is connected to the VDD pin. When the jumper is connected to the VDD pin the I2C address
+//is 0x69.
+char itgAddress = 0x69;
+
+// END GYRO
+
 // The SparkFun breakout board defaults to 1, set to 0 if SA0 jumper on the bottom of the board is set
 #define MMA8452_ADDRESS 0x1D  // 0x1D if SA0 is high, 0x1C if low
 
@@ -35,12 +67,14 @@
 
 #define GSCALE 2 // Sets full-scale range to +/-2, 4, or 8g. Used to calc real g values.
 
+
+
 boolean initDone;
 float accelG[3];
 float x;
 float z;
 
- 
+
 
 void setup()
 {
@@ -49,6 +83,22 @@ void setup()
   initDone = true;
   Wire.begin(); //Join the bus as a master
   initMMA8452(); //Test and intialize the MMA8452
+  
+  // GRYRO
+
+  //Read the WHO_AM_I register and print the result
+    char id=0; 
+    id = itgRead(itgAddress, 0x00);  
+    Serial.print("ID: ");
+    Serial.println(id, HEX);
+    
+    //Configure the gyroscope
+    //Set the gyroscope scale for the outputs to +/-2000 degrees per second
+    itgWrite(itgAddress, DLPF_FS, (DLPF_FS_SEL_0|DLPF_FS_SEL_1|DLPF_CFG_0));
+    //Set the sample rate to 100 hz
+    itgWrite(itgAddress, SMPLRT_DIV, 9);
+
+  // END GYRO
 }
 
 void loop()
@@ -62,61 +112,7 @@ void loop()
   {
     accelGCurr[i] = (float) accelCount[i] / ((1<<12)/(2*GSCALE));  // get actual g value, this depends on scale being set
   }
-/*
-// Print out values
-  for (int i = 0 ; i < 3 ; i++)
-  {
-    Serial.print(accelGCurr[i], 4);  // Print g values
-    Serial.print("\t");  // tabs in between axes
-  }
-*/ 
-/*if(initDone)
-{
- accelG[1]= 0;
-  accelG[2] = 0;
-  accelG[3] = 0;
- for (int j = 0; j < 100; j++){
-  accelG[1] = (accelGCurr[1] + accelG[1]);
-  accelG[2] = (accelGCurr[2] + accelG[2]);
-  accelG[3] = (accelGCurr[3] + accelG[3]);
- }
- 
- accelG[1] = accelG[1]/100;
- accelG[2] = accelG[2]/100;
- accelG[3] = accelG[3]/100;
- initDone = false;
- 
-  // Print out values
-  for (int i = 0 ; i < 3 ; i++)
-  {
-    Serial.print(accelG[i], 4);  // Print g values
-    Serial.print("\t");  // tabs in between axes
-  }
- 
- }
- 
- accelG[0] = 0;
- accelG[1] = 0;
- accelG[2] = 1;
- 
- x = accelGCurr[0];
- z = accelGCurr[2];
 
- float xdiff;
- float zdiff;
-
- xdiff = accelG[0] - x;
- zdiff = (z-1) - accelG[2];
- 
- if (xdiff == 0){
-  xdiff = 0.01; 
-  
- }
-
- float angle = degrees(atan2(zdiff, xdiff));
- Serial.print(angle);
- Serial.print("\t");  // tabs in between axes
- */
  int string;
  
   x = accelGCurr[0];
@@ -127,13 +123,13 @@ void loop()
  Serial.print(angle);
  Serial.print("\t");  // tabs in between axes
  
- if (angle < 45.0 && angle > 0){
+ if (angle < 0.0 && angle > -40.0){
   string = 1; 
  }
- else if (angle < 90.0 && angle > 45.0){
+ else if (angle < 25.0 && angle > 0.0){
   string = 2; 
  }
- else if (angle < 135.0 && angle > 90.0){
+ else if (angle < 50.0 && angle > 25.0){
   string = 3; 
  }
  else
@@ -141,19 +137,24 @@ void loop()
  
  Serial.print(string);
  
- /*Serial.print(xdiff);
- Serial.print("\t");  // tabs in between axes
- Serial.print(zdiff);
- Serial.print("\t");  // tabs in between axes
- Serial.print(z);
- Serial.print("\t");  // tabs in between axes
-*/
   Serial.println();
-/*  if(initDone)
-  delay(300);
-  else
+
+  //Create variables to hold the output rates.
+    int xRate, yRate, zRate;
+  
+    //Read the x,y and z output rates from the gyroscope.
+    xRate = readX();
+    yRate = readY();
+    zRate = readZ();
+  /*
+    //Print the output rates to the terminal, seperated by a TAB character.
+    Serial.print(xRate);
+    Serial.print('\t');
+    Serial.print(yRate);
+    Serial.print('\t');
+    Serial.println(zRate);
 */
-  delay(300);  // Delay here for visibility
+  delay(10);  // Delay here for visibility
 }
 
 void readAccelData(int *destination)
@@ -259,3 +260,96 @@ void writeRegister(byte addressToWrite, byte dataToWrite)
   Wire.write(dataToWrite);
   Wire.endTransmission(); //Stop transmitting
 }
+  //GYRO
+  
+  //This function will write a value to a register on the itg-3200.
+//Parameters:
+//  char address: The I2C address of the sensor. For the ITG-3200 breakout the address is 0x69.
+//  char registerAddress: The address of the register on the sensor that should be written to.
+//  char data: The value to be written to the specified register.
+void itgWrite(char address, char registerAddress, char data)
+{
+  //Initiate a communication sequence with the desired i2c device
+  Wire.beginTransmission(address);
+  //Tell the I2C address which register we are writing to
+  Wire.write(registerAddress);
+  //Send the value to write to the specified register
+  Wire.write(data);
+  //End the communication sequence
+  Wire.endTransmission();
+}
+
+//This function will read the data from a specified register on the ITG-3200 and return the value.
+//Parameters:
+//  char address: The I2C address of the sensor. For the ITG-3200 breakout the address is 0x69.
+//  char registerAddress: The address of the register on the sensor that should be read
+//Return:
+//  unsigned char: The value currently residing in the specified register
+unsigned char itgRead(char address, char registerAddress)
+{
+  //This variable will hold the contents read from the i2c device.
+  unsigned char data=0;
+  
+  //Send the register address to be read.
+  Wire.beginTransmission(address);
+  //Send the Register Address
+  Wire.write(registerAddress);
+  //End the communication sequence.
+  Wire.endTransmission();
+  
+  //Ask the I2C device for data
+  Wire.beginTransmission(address);
+  Wire.requestFrom(address, 1);
+  
+  //Wait for a response from the I2C device
+  if(Wire.available()){
+    //Save the data sent from the I2C device
+    data = Wire.read();
+  }
+  
+  //End the communication sequence.
+  Wire.endTransmission();
+  
+  //Return the data read during the operation
+  return data;
+}
+
+//This function is used to read the X-Axis rate of the gyroscope. The function returns the ADC value from the Gyroscope
+//NOTE: This value is NOT in degrees per second. 
+//Usage: int xRate = readX();
+int readX(void)
+{
+  int data=0;
+  data = itgRead(itgAddress, GYRO_XOUT_H)<<8;
+  data |= itgRead(itgAddress, GYRO_XOUT_L);  
+  
+  return data;
+}
+
+//This function is used to read the Y-Axis rate of the gyroscope. The function returns the ADC value from the Gyroscope
+//NOTE: This value is NOT in degrees per second. 
+//Usage: int yRate = readY();
+int readY(void)
+{
+  int data=0;
+  data = itgRead(itgAddress, GYRO_YOUT_H)<<8;
+  data |= itgRead(itgAddress, GYRO_YOUT_L);  
+  
+  return data;
+}
+
+//This function is used to read the Z-Axis rate of the gyroscope. The function returns the ADC value from the Gyroscope
+//NOTE: This value is NOT in degrees per second. 
+//Usage: int zRate = readZ();
+int readZ(void)
+{
+  int data=0;
+  data = itgRead(itgAddress, GYRO_ZOUT_H)<<8;
+  data |= itgRead(itgAddress, GYRO_ZOUT_L);  
+  
+  return data;
+  
+  //END GYRO
+}
+
+
