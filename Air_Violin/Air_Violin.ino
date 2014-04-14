@@ -74,7 +74,12 @@ float accelG[3];
 float x;
 float z;
 
-
+int xRate, yRate, zRate;
+   int stringNumber;
+ float angle;
+int accelCount[3];  // Stores the 12-bit signed value
+  float accelGCurr[3];  // Stores the real accel value in g's
+int abc = 0;
 
 void setup()
 {
@@ -103,58 +108,64 @@ void setup()
 
 void loop()
 {  
-  int accelCount[3];  // Stores the 12-bit signed value
+  abc++;
+  if(abc > 1000)
+  {
+    Serial.println("done");
+    delay(9000);
+  }
+  
   readAccelData(accelCount);  // Read the x/y/z adc values
 
   // Now we'll calculate the accleration value into actual g's
-  float accelGCurr[3];  // Stores the real accel value in g's
+  
   for (int i = 0 ; i < 3 ; i++)
   {
     accelGCurr[i] = (float) accelCount[i] / ((1<<12)/(2*GSCALE));  // get actual g value, this depends on scale being set
   }
 
- int string;
- 
+
   x = accelGCurr[0];
   z = accelGCurr[2];
   
- float angle; 
- angle = degrees(atan2(x, z));
- Serial.print(angle);
- Serial.print("\t");  // tabs in between axes
  
+ angle = degrees(atan2(x, z));
  if (angle < 0.0 && angle > -40.0){
-  string = 1; 
+  stringNumber = 1; 
  }
  else if (angle < 25.0 && angle > 0.0){
-  string = 2; 
+  stringNumber = 2; 
  }
  else if (angle < 50.0 && angle > 25.0){
-  string = 3; 
+  stringNumber = 3; 
  }
  else
- string = 4;
+  stringNumber = 4;
  
- Serial.print(string);
+ //Serial.print(stringNumber);
  
-  Serial.println();
-
-  //Create variables to hold the output rates.
-    int xRate, yRate, zRate;
-  
+ // Serial.println();
+ 
+ //Create variables to hold the output rates.
+     
     //Read the x,y and z output rates from the gyroscope.
     xRate = readX();
     yRate = readY();
     zRate = readZ();
-  /*
+    
+    
+    
+Serial.print(angle);
+Serial.print("\t");  // tabs in between axes
+  
     //Print the output rates to the terminal, seperated by a TAB character.
-    Serial.print(xRate);
+ /*   Serial.print(xRate);
     Serial.print('\t');
     Serial.print(yRate);
     Serial.print('\t');
-    Serial.println(zRate);
-*/
-  delay(10);  // Delay here for visibility
+    Serial.println(zRate);*/
+
+  delay(200);  // Delay here for visibility
 }
 
 void readAccelData(int *destination)
