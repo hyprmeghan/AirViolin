@@ -528,7 +528,7 @@ int maxStrings()
 //string encoding
 void strings(int id)
 {
-   digitalWrite(STR1,LOW);
+  digitalWrite(STR1,LOW);
   digitalWrite(STR2,LOW);
   switch(id)
   {
@@ -599,27 +599,27 @@ void fingers(int id)
   switch(id)
   {
     case 1:
-    digitalWrite(FIN1,HIGH);
+    digitalWrite(FIN1,LOW);
     digitalWrite(FIN2,LOW);
     digitalWrite(FIN3,LOW);
     break;
     case 2:
     digitalWrite(FIN2,HIGH);
-    digitalWrite(FIN1,LOW);
+    digitalWrite(FIN2,LOW);
     digitalWrite(FIN3,LOW);
     break;
     case 3:
-    digitalWrite(FIN1,HIGH);
+    digitalWrite(FIN1,LOW);
     digitalWrite(FIN2,HIGH);
     digitalWrite(FIN3,LOW);
     break;
     case 4:
-    digitalWrite(FIN3,HIGH);
-    digitalWrite(FIN2,LOW);
-    digitalWrite(FIN1,LOW);
+    digitalWrite(FIN1,HIGH);
+    digitalWrite(FIN2,HIGH);
+    digitalWrite(FIN3,LOW);
     break;
     default:
-    digitalWrite(FIN3,LOW);
+    digitalWrite(FIN3,HIGH);
     digitalWrite(FIN2,LOW);
     digitalWrite(FIN1,LOW);
     break;

@@ -10,6 +10,7 @@
 #define SOUT 13
 
 void setup(){
+  Serial.begin(57600);
   pinMode(LED1, OUTPUT);
   pinMode(LED2, OUTPUT);
   pinMode(LED3, OUTPUT);
@@ -24,9 +25,21 @@ void loop(){
   int STR2 = analogRead(1);
   int FIN1 = analogRead(2);
   int FIN2 = analogRead(3);
-  int MOV = analogRead(4);
-    
-  if (!STR1 && !STR2 && MOV){
+  int FIN3 = analogRead(4);
+  int MOV = analogRead(5);
+  
+  Serial.println(FIN1);
+  Serial.println('\t');
+  Serial.println(FIN2);
+  Serial.println('\t');
+  Serial.println(FIN3);
+  Serial.println('\t');
+  
+  if (FIN3){
+    noTone(8);
+  }
+  
+  else if (!STR1 && !STR2 && MOV){
   digitalWrite(LED1, HIGH);
   digitalWrite(LED2, LOW);
   digitalWrite(LED3, LOW);
