@@ -1,3 +1,12 @@
+/*
+Air Violin Sensor Processsing
+
+Meghan Jimenez and Antoine Billig
+
+Receives and processes data from flex sensors (analog input) and a 3-axis accelerometer 
+(over I2C). Outputs information on string to LEDs and information on finger to buzzers.
+*/
+
 #include <Wire.h> 
 
 #define MMA8452_ADDRESS 0x1D  // 0x1D if SA0 is high, 0x1C if low
@@ -24,7 +33,7 @@
 #define MOV 8
 #define OFF 0
 const float THRESHOLDS[] = {0.30,0.45,0.45,0.45};
-const float FINGER_TRESH[] = {850,865,820,800};
+const float FINGER_TRESH[] = {850,865,790,800};
 struct angleData {
   float angle;
   float accelX;
@@ -92,21 +101,22 @@ void loop()
  sensor2 = analogRead(1);
  sensor3 = analogRead(2);
  sensor4 = analogRead(3);
- if (sensor1 > FINGER_TRESH[0]){
- leftHand(1);
- }
-else if (sensor2 > FINGER_TRESH[1]){
  
-  leftHand(2);
-}
-else if (sensor3 > FINGER_TRESH[2]){
- 
-leftHand(3);
-}
-else if (sensor4 > FINGER_TRESH[3]){
+ if (sensor4 > FINGER_TRESH[3]){
    leftHand(4);
+  } 
+ else if (sensor3 > FINGER_TRESH[2]){ 
+   leftHand(3);
+  }
+  
+ else if (sensor2 > FINGER_TRESH[1]){
+   leftHand(2);
+  }
+ 
+ else if (sensor1 > FINGER_TRESH[0]){
+   leftHand(1);
+ }
 
-}
 else
 {
   leftHand(OFF);
@@ -604,7 +614,7 @@ void fingers(int id)
     digitalWrite(FIN3,LOW);
     break;
     case 2:
-    digitalWrite(FIN2,HIGH);
+    digitalWrite(FIN1,HIGH);
     digitalWrite(FIN2,LOW);
     digitalWrite(FIN3,LOW);
     break;
