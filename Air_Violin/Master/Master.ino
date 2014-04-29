@@ -32,7 +32,7 @@ Receives and processes data from flex sensors (analog input) and a 3-axis accele
 #define MOT4 4
 #define MOV 8
 #define OFF 0
-const float THRESHOLDS[] = {0.30,0.45,0.45,0.45};
+const float THRESHOLDS[] = {0.25,0.3,0.3,0.5};
 const float FINGER_TRESH[] = {850,865,790,800};
 struct angleData {
   float angle;

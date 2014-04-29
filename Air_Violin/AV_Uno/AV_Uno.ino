@@ -101,7 +101,7 @@ void loop(){
     }
     
     else if (string == 1 && finger == 3){
-      tone(SOUT, NOTE_C4);
+      tone(SOUT, NOTE_CS4);
     }
     
     else if (string == 1 && finger == 4){
@@ -117,7 +117,7 @@ void loop(){
     }
     
     else if (string == 2 && finger == 2){
-      tone(SOUT, NOTE_F4);
+      tone(SOUT, NOTE_FS4);
     }
     
     else if (string == 2 && finger == 3){
@@ -137,7 +137,7 @@ void loop(){
     }
     
     else if (string == 3 && finger == 2){
-      tone(SOUT, NOTE_C5);
+      tone(SOUT, NOTE_CS5);
     }
     
     else if (string == 3 && finger == 3){
@@ -153,7 +153,7 @@ void loop(){
     }
     
     else if (string == 4 && finger == 1){
-      tone(SOUT, NOTE_F5);
+      tone(SOUT, NOTE_FS5);
     }
     
     else if (string == 4 && finger == 2){
@@ -175,8 +175,8 @@ void loop(){
   
   //if the right hand is not in motion
   //play no sound
-  /*else{
+  else{
      noTone(SOUT); 
   }
-  */
+
 }
