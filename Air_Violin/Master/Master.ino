@@ -1,3 +1,4 @@
+
 /*
 Air Violin Sensor Processsing
 
@@ -19,7 +20,7 @@ Receives and processes data from flex sensors (analog input) and a 3-axis accele
 
 #define GSCALE 2 // Sets full-scale range to +/-2, 4, or 8g. Used to calc real g values.
 
-#define BUFF_SIZE 40
+#define BUFF_SIZE 50
 #define UNDEF -1
 #define STR1 12
 #define STR2 11
@@ -139,8 +140,6 @@ else
   
  float angle; 
  angle = degrees(atan2(x, z));
- Serial.print(angle);
- Serial.print("\t");  // tabs in between axes
  
  readAccelData(accelCount);  // Read the x/y/z adc values
   for (int i = 0 ; i < 3 ; i++)
@@ -160,13 +159,13 @@ else
   }
  angle = degrees(atan2(y, z));
 
- if (angle <= -2.5 && angle > -152.5){
+ if (angle <= -19.5 && angle > -152.5){
   string = 1; 
  }
- else if (angle <= 27.5 && angle > -2.5){
+ else if (angle <= 20.5 && angle > -19.5){
   string = 2; 
  }
- else if (angle <= 57.5 && angle > 27.5){
+ else if (angle <= 78.5 && angle > 20.5){
   string = 3; 
  }
  else {
@@ -214,7 +213,7 @@ if(true)
         }
         if(prevStr+stringHold == 3)
         {
-          /*if(mostProb == 1)
+          if(mostProb == 1)
           {
             stringHold = 1;
             if(prevStr == 1)
@@ -234,7 +233,7 @@ if(true)
           {
           mostProb = 2;
           stringHold = 2;
-          }*/
+          }
           mostProb= 2;
           stringHold = 2;
         }
@@ -256,7 +255,7 @@ if(true)
             }
             else if(prevStr == 3 && prevStr2 == 3)
             {
-              mostProb = 2;
+              mostProb = 3;
               stringHold = 3;
             }
             else
@@ -274,8 +273,8 @@ if(true)
             }
             else if(prevStr == 2 && prevStr2 == 3)
             {
-               mostProb = 2;
-               stringHold = 2;
+               mostProb = 3;
+               stringHold = 3;
             
             }
             else if(prevStr2 == 2 && prevStr== 2)
@@ -636,3 +635,4 @@ void fingers(int id)
   }
   
 }
+ 
